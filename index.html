@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Clock</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="./Clock.jpg" type="image/jpg">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        * {box-sizing: border-box}
+
+        /* Container for the tabs and content */
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Style the tab */
+        .tab {
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            width: 200px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        /* Style the buttons that are used to open the tab content */
+        .tab button {
+            display: block;
+            background-color: inherit;
+            color: black;
+            padding: 22px 16px;
+            width: 100%;
+            border: none;
+            outline: none;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current "tab button" class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            padding: 20px;
+            border: 1px solid #ccc;
+            flex: 1;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        /* Adjusting iframe size */
+        iframe {
+            width: 100%;
+            height: calc(100% - 40px); /* Adjust for padding */
+            border: none;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .tab {
+                position: fixed;
+                bottom: 0; /* Align the tab buttons to the bottom */
+                height: auto;
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                background-color: #f1f1f1;
+                margin-left: -15px;
+            }
+
+            .tab button {
+                flex: 1; /* Spread buttons evenly across the width */
+            }
+
+            .tabcontent {
+                margin-bottom: 50px; /* Adjust margin to create space for tabs at the bottom */
+                height: calc(100vh - 50px); /* Adjust content height above the tabs */
+            }
+
+            iframe {
+                height: calc(100% - 40px);
+            }
+        }
+            
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="tab">
+        <button class="tablink" onclick="openCity(event, 'Alarm')" id="defaultOpen">Alarm</button>
+        <button class="tablink" onclick="openCity(event, 'WorldClock')">World Clock</button>
+        <button class="tablink" onclick="openCity(event, 'PomodoroClock')">Pomodoro Clock</button>
+        <button class="tablink" onclick="openCity(event, 'Stopwatch')">Stopwatch</button>
+        <button class="tablink" onclick="openCity(event, 'Timer')">Timer</button>
+    </div>
+
+<div class="tabcontent" id="Alarm">
+    <iframe src="./Clock Elements/alarm.html"></iframe>
+</div>
+
+<div class="tabcontent" id="WorldClock">
+    <iframe src="./Clock Elements/world clock.html"></iframe>
+</div>
+
+<div class="tabcontent" id="PomodoroClock">
+    <iframe src="./Clock Elements/pomodoro clock.html"></iframe>
+</div>
+
+<div class="tabcontent" id="Stopwatch">
+    <iframe src="./Clock Elements/stopwatch.html"></iframe>
+</div>
+
+<div class="tabcontent" id="Timer">
+    <iframe src="./Clock Elements/timer.html"></iframe>
+</div>
+</div>
+
+<script>
+    // Function to open city tab content
+    function openCity(evt, cityName) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tabcontent" and hide them
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Get all elements with class="tablink" and remove the class "active"
+        tablinks = document.getElementsByClassName("tablink");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+</script>
+</body>
+</html>

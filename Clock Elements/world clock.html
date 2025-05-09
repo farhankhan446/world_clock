@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Clock</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #00BFFF, #F5DEB3);
+    }    
+    h1 {
+        margin-top: 20px;
+    }
+    #search-container {
+        margin: 20px auto;
+        max-width: 400px;
+    }
+    #city-search {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #333;
+    }
+    #clocks {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .clock {
+        border: 2px solid #333;
+        border-radius: 10px;
+        padding: 20px;
+        width: calc(100% - 40px); /* Adjusting box size */
+        max-width: 400px;
+        margin-bottom: 20px;
+    }
+    .clock h2 {
+        margin-top: 0;
+    }
+    .remove-btn {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .remove-btn:hover {
+        background-color: #cc0000;
+    }
+
+    @media only screen and (max-width: 768px) {
+            *{
+                margin: 10px;
+            }
+        }
+</style>
+</head>
+<body>
+<h1>World Clock</h1>
+<div id="search-container">
+    <input type="text" id="city-search" placeholder="Search for a city (e.g. Tokyo, Paris, Dubai)">
+    <div id="suggestions" style="display: none;"></div>
+</div>
+<div id="clocks">
+    <div id="london" class="clock">
+        <h2>London</h2>
+        <div id="londonTime"></div>
+    </div>
+    <div id="newDelhi" class="clock">
+        <h2>New Delhi</h2>
+        <div id="newDelhiTime"></div>
+    </div>
+    <div id="newYork" class="clock">
+        <h2>New York</h2>
+        <div id="newYorkTime"></div>
+    </div>
+    <div id="toronto" class="clock">
+        <h2>Toronto</h2>
+        <div id="torontoTime"></div>
+    </div>
+</div>
+
+<script>
+// Common timezones for major cities
+const cityTimezones = {
+    "tokyo": "Asia/Tokyo",
+    "paris": "Europe/Paris",
+    "dubai": "Asia/Dubai",
+    "sydney": "Australia/Sydney",
+    "beijing": "Asia/Shanghai",
+    "moscow": "Europe/Moscow",
+    "berlin": "Europe/Berlin",
+    "rome": "Europe/Rome",
+    "singapore": "Asia/Singapore",
+    "seoul": "Asia/Seoul",
+    "los angeles": "America/Los_Angeles",
+    "chicago": "America/Chicago",
+    "rio de janeiro": "America/Sao_Paulo",
+    "mexico city": "America/Mexico_City",
+    "cairo": "Africa/Cairo",
+    "cape town": "Africa/Johannesburg",
+    "nairobi": "Africa/Nairobi"
+};
+
+// Original cities with their timezones
+const originalCities = {
+    "london": "Europe/London",
+    "newDelhi": "Asia/Kolkata",
+    "newYork": "America/New_York",
+    "toronto": "America/Toronto"
+};
+
+function updateClock(cityId, timezone) {
+    const timeString = new Date().toLocaleString("en-US", {timeZone: timezone});
+    document.getElementById(cityId + "Time").textContent = timeString;
+}
+
+function updateClocks() {
+    // Update original cities
+    for (const city in originalCities) {
+        updateClock(city, originalCities[city]);
+    }
+    
+    // Update added cities
+    const addedCities = JSON.parse(localStorage.getItem('addedCities') || '{}');
+    for (const city in addedCities) {
+        if (document.getElementById(city)) {
+            updateClock(city, addedCities[city]);
+        }
+    }
+}
+
+function addCityClock(cityName, timezone) {
+    const normalizedCityName = cityName.toLowerCase().replace(/\s+/g, '');
+    
+    // Check if city already exists
+    if (document.getElementById(normalizedCityName) || originalCities[normalizedCityName]) {
+        return;
+    }
+    
+    // Create new clock element
+    const clockDiv = document.createElement('div');
+    clockDiv.id = normalizedCityName;
+    clockDiv.className = 'clock';
+    clockDiv.innerHTML = `
+        <h2>${cityName}</h2>
+        <div id="${normalizedCityName}Time"></div>
+        <button class="remove-btn" onclick="removeCity('${normalizedCityName}')">Remove</button>
+    `;
+    
+    document.getElementById('clocks').appendChild(clockDiv);
+    
+    // Save to localStorage
+    const addedCities = JSON.parse(localStorage.getItem('addedCities') || '{}');
+    addedCities[normalizedCityName] = timezone;
+    localStorage.setItem('addedCities', JSON.stringify(addedCities));
+    
+    // Update the new clock immediately
+    updateClock(normalizedCityName, timezone);
+}
+
+function removeCity(cityId) {
+    const clockElement = document.getElementById(cityId);
+    if (clockElement) {
+        clockElement.remove();
+        
+        // Remove from localStorage
+        const addedCities = JSON.parse(localStorage.getItem('addedCities') || '{}');
+        delete addedCities[cityId];
+        localStorage.setItem('addedCities', JSON.stringify(addedCities));
+    }
+}
+
+// Load any previously added cities when page loads
+function loadAddedCities() {
+    const addedCities = JSON.parse(localStorage.getItem('addedCities') || '{}');
+    for (const city in addedCities) {
+        const cityName = city.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        addCityClock(cityName, addedCities[city]);
+    }
+}
+
+// Search functionality
+document.getElementById('city-search').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    if (searchTerm.length < 2) {
+        document.getElementById('suggestions').style.display = 'none';
+        return;
+    }
+    
+    const matches = [];
+    for (const city in cityTimezones) {
+        if (city.includes(searchTerm)) {
+            matches.push(city);
+        }
+    }
+    
+    const suggestionsDiv = document.getElementById('suggestions');
+    if (matches.length > 0) {
+        suggestionsDiv.innerHTML = matches.map(city => 
+            `<div style="padding: 5px; cursor: pointer; background: #f1f1f1; margin: 2px; border-radius: 3px;" 
+                  onclick="addCityClock('${city.replace(/\b\w/g, l => l.toUpperCase())}', '${cityTimezones[city]}')">
+                ${city.replace(/\b\w/g, l => l.toUpperCase())}
+             </div>`
+        ).join('');
+        suggestionsDiv.style.display = 'block';
+    } else {
+        suggestionsDiv.style.display = 'none';
+    }
+});
+
+// Initialize
+loadAddedCities();
+setInterval(updateClocks, 1000);
+updateClocks();
+</script>
+</body>
+</html>
